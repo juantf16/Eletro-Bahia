@@ -11,7 +11,7 @@ int valorup = 0;
 int valordow = 0;
 int valorselect = 0;
 int valortemp = 0;
-
+int menu = 0;
 
 
 void setup() {
@@ -26,13 +26,23 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite (ebulidor, HIGH);
-  delay (100);
-  digitalWrite (ebulidor, LOW);
-  delay (100);
-  digitalWrite (prep, HIGH);
-  delay (100);
-  digitalWrite (prep, LOW);
-  delay(100);
+
+  valorup = digitalRead (up);
+
+  if (valorup == 1){
+      delay(500);
+ }
+
+ if (valorup == 1){
+  menu++;
+
+  if (menu >4){
+    menu = 1;
+  }
+ }
+
+
+ Serial.println(menu);
+ delay(1000);
 
 }
