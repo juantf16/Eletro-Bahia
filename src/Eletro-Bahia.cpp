@@ -9,7 +9,7 @@ const int prep = 23;
 
 int valorup = 0;
 int valordow = 0;
-int valorselect = 0;
+int valorselecionar = 0;
 int valortemp = 0;
 int menu = 0;
 
@@ -28,6 +28,8 @@ void setup() {
 void loop() {
 
   valorup = digitalRead (up);
+  valordow = digitalRead (dow);
+  valorselecionar = digitalRead (selecionar);
 
   if (valorup == 1){
       delay(500);
@@ -41,8 +43,19 @@ void loop() {
   }
  }
 
+  if (valordow == 1){
+    delay (500);
+  }
 
- Serial.println(menu);
- delay(1000);
+  if (valordow == 1){
+    menu --;
+     if (menu < 1){
+      menu = 4;
+     }
+  }
+
+  if (valorselecionar == 1){
+    delay (500);
+  }
 
 }
