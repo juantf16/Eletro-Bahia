@@ -13,6 +13,10 @@ int valorselecionar = 0;
 int valortemp = 0;
 int menu = 0;
 int ultimoMenu = 0;
+int leiturapot = 0;
+
+float tensao = 0;
+float temperatura = 0;
 
 
 void setup() {
@@ -31,7 +35,14 @@ void loop() {
   valorup = digitalRead (up);
   valordown = digitalRead (down);
   valorselecionar = digitalRead (selecionar);
+  leiturapot = analogRead (temp);
 
+
+   // convertendo analog => para volts
+  tensao = (leiturapot / 4095.0) * 3.3;
+
+  // simulando: 0V => 0°C e 3.3V => 100°c
+  temperatura = (tensao / 3.3) *100.0;
 
   // mepeando bot up
   if (valorup == 1){
@@ -41,7 +52,7 @@ void loop() {
  if (valorup == 1){
   menu++;
 
-  if (menu >4){
+  if (menu >2){
     menu = 1;
   }
  }
@@ -54,7 +65,7 @@ void loop() {
   if (valordown == 1){
     menu --;
      if (menu < 1){
-      menu = 4;
+      menu = 2;
      }
   }
 
@@ -75,22 +86,12 @@ void loop() {
   if (valorselecionar == 1){
     switch (menu){
       case 1:
-       Serial.print ("modo selecionado: ");
+       Serial.print ("modo automatico selecionado: ");
        Serial.println (menu);
        break;
 
       case 2:
-       Serial.print ("modo selecionado: ");
-       Serial.println (menu);
-       break;
-
-      case 3:
-       Serial.print ("modo selecionado: ");
-       Serial.println (menu);
-       break;
-
-      case 4: 
-       Serial.print ("modo manual selecionado: ");
+       Serial.print ("modo manual selecionado:  ");
        Serial.println (menu);
        break;
 
