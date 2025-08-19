@@ -1,4 +1,8 @@
 #include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+LiquidCrystal_I2C LCD (0x27, 16, 2);
 
 const int up = 4;
 const int down = 5;
@@ -20,7 +24,13 @@ float temperatura = 0;
 
 
 void setup() {
-  Serial.begin (115200);
+  Wire.begin(21, 22); 
+  LCD.init();
+  LCD.setBacklight(HIGH);
+  LCD.clear();
+  LCD.setCursor(0,0);
+  LCD.print("Cuscuszeira");
+
   pinMode(up, INPUT);  
   pinMode(down, INPUT);
   pinMode (selecionar, INPUT);
@@ -52,7 +62,7 @@ void loop() {
  if (valorup == 1){
   menu++;
 
-  if (menu >2){
+  if (menu >3){
     menu = 1;
   }
  }
@@ -65,14 +75,18 @@ void loop() {
   if (valordown == 1){
     menu --;
      if (menu < 1){
-      menu = 2;
+      menu = 3;
      }
   }
 
   //mostra no seria os modos
   if (menu != ultimoMenu) {
-    Serial.print("modo: ");
-    Serial.println(menu);
+
+    LCD.clear();
+    LCD.setCursor(0,0);
+    LCD.print("Modo:");
+    LCD.setCursor(6,0);
+    LCD.print(menu);
     ultimoMenu = menu;
   }
 
@@ -86,17 +100,23 @@ void loop() {
   if (valorselecionar == 1){
     switch (menu){
       case 1:
-       Serial.print ("modo automatico selecionado: ");
-       Serial.println (menu);
+       LCD.setCursor (0, 0);
+       LCD.print ("modo automatico ");
        break;
 
       case 2:
-       Serial.print ("modo manual selecionado:  ");
-       Serial.println (menu);
+      LCD.setCursor (0, 0);
+      LCD.print("modo manual:  ");
+       break;
+
+      case 3:
+       LCD.setCursor (0, 0);
+       LCD.print("modo agendado: ");
        break;
 
       default:
-       Serial.print("modo inexistente");
+      LCD.setCursor(0, 0);
+       LCD.print("modo inexistente");
        break;
     }
     delay (1000);
