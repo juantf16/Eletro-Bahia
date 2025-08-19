@@ -102,11 +102,47 @@ void loop() {
       case 1:
        LCD.setCursor (0, 0);
        LCD.print ("modo automatico ");
+
+       while (temperatura < 30){
+        
+      LCD.setCursor(0,0);
+      LCD.print("Pre-Aquecendo... "); 
+      LCD.setCursor(0,1);
+      LCD.print("Temp: ");
+      LCD.print(temperatura, 1);   
+      LCD.print((char)223);        
+      LCD.print("C   ");    
+    }
+
+       digitalWrite (ebulidor, HIGH);
+       digitalWrite (prep, LOW);
+       delay (3000);
+       digitalWrite (ebulidor, LOW);
+       digitalWrite (prep, LOW);
+
+       LCD.clear();
+       LCD.setCursor (0, 0);
+       LCD.print ("Pronto !!!");
+       
        break;
 
       case 2:
       LCD.setCursor (0, 0);
       LCD.print("modo manual:  ");
+
+      while (temperatura < 30){
+        
+        LCD.setCursor (0,0);
+        LCD.print ("Pré-Aquecendo... ");
+
+        digitalWrite (ebulidor, HIGH);
+        digitalWrite (prep, HIGH);
+        leiturapot = analogRead (temp);
+        tensao = (leiturapot / 4095.0) * 3.3;
+        temperatura = (tensao / 3.3) *100.0;
+        delay(500);
+      }
+
        break;
 
       case 3:
