@@ -167,6 +167,6 @@ void preparoEaquecimento (){
     digitalWrite(ebulidor, LOW);
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
-    LCD.print("Quente demais!    ");
+    LCD.print("Quente!    ");
   }
 }
