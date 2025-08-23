@@ -18,14 +18,18 @@ int valortemp = 0;
 int menu = 0;
 int ultimoMenu = 0;
 int leiturapot = 0;
+int meuTempo = 1;
 
 float tensao = 0;
 float temperatura = 0;
 
 unsigned long inicioPreparo = 0;
+unsigned long tempoAtual = meuTempo * 60UL * 1000UL;
 bool preparando = false;
+bool preparo = false;
 
 void preparoEaquecimento ();
+void modoManual ();
 
 
 
@@ -117,6 +121,12 @@ void loop() {
       case 2:
       LCD.setCursor (0, 0);
       LCD.print("modo manual:  "); 
+
+      inicioPreparo = millis();
+      preparo = true;
+
+
+
       break;
 
       case 3:
@@ -134,6 +144,10 @@ void loop() {
 
   if (preparando){
     preparoEaquecimento();
+  }
+
+  if (preparo == true ){
+    modoManual();
   }
 
 } 
@@ -158,15 +172,54 @@ void preparoEaquecimento (){
     digitalWrite(prep, HIGH);
     LCD.setCursor(0,0);
     LCD.print("Pre-Aquecendo...  ");
-  } else if (temperatura >= 31 && temperatura < 95) {
+  } else if (temperatura >= 31 && temperatura < 100) {
     digitalWrite(ebulidor, HIGH);
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
     LCD.print("Preparando...     ");
-  } else {
-    digitalWrite(ebulidor, LOW);
+  }
+}
+
+void modoManual (){
+  unsigned agora = millis();
+  unsigned long tempoAtual = meuTempo * 60UL * 1000UL; 
+
+  if (agora - inicioPreparo >= tempoAtual && preparo){
+     digitalWrite (ebulidor, LOW);
+     digitalWrite (prep, LOW);
+     LCD.clear ();
+     LCD.setCursor (0, 0);
+     LCD.print ("Cuzcuz pronto");
+     preparo = false;
+     return;
+  }
+
+  // Pré-aquecimento e preparo
+  if (temperatura < 30) {
+    digitalWrite(ebulidor, HIGH);
+    digitalWrite(prep, HIGH);
+    LCD.setCursor(0,0);
+    LCD.print("Pre-Aquecendo...  ");
+  } else if (temperatura >= 31 && temperatura < 100) {
+    digitalWrite(ebulidor, HIGH);
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
-    LCD.print("Quente!    ");
+    LCD.print("Preparando...     ");
+  } 
+
+  if (valorup == HIGH){
+    meuTempo ++;
   }
+
+  if (valordown == HIGH){
+    meuTempo --;
+  }
+
+  LCD.setCursor (0, 1);
+  LCD.print ("tempo: ");
+  LCD.print(meuTempo);
+  LCD.print (" min  ");
+
+
+
 }
