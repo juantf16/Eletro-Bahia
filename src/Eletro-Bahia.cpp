@@ -124,9 +124,6 @@ void loop() {
 
       inicioPreparo = millis();
       preparo = true;
-
-
-
       break;
 
       case 3:
@@ -142,7 +139,7 @@ void loop() {
     delay (1000);
   }
 
-  if (preparando){
+  if (preparando == true){
     preparoEaquecimento();
   }
 
@@ -181,15 +178,15 @@ void preparoEaquecimento (){
 }
 
 void modoManual (){
-  unsigned agora = millis();
+  unsigned long agora = millis();
   unsigned long tempoAtual = meuTempo * 60UL * 1000UL; 
 
-  if (agora - inicioPreparo >= tempoAtual && preparo){
+  if (agora - inicioPreparo >= tempoAtual && preparo == true){
      digitalWrite (ebulidor, LOW);
      digitalWrite (prep, LOW);
      LCD.clear ();
      LCD.setCursor (0, 0);
-     LCD.print ("Cuzcuz pronto");
+     LCD.print ("Cuzcuz pronto"); 
      preparo = false;
      return;
   }
