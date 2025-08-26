@@ -19,6 +19,7 @@ int menu = 0;
 int ultimoMenu = 0;
 int leiturapot = 0;
 int meuTempo = 1;
+int buzzer = 12;
 
 float tensao = 0;
 float temperatura = 0;
@@ -30,6 +31,7 @@ bool preparo = false;
 
 void preparoEaquecimento ();
 void modoManual ();
+void tocarBuzzer ();
 
 
 
@@ -47,6 +49,7 @@ void setup() {
   pinMode (temp, INPUT);
   pinMode (ebulidor, OUTPUT);
   pinMode (prep, OUTPUT);
+  pinMode (buzzer, OUTPUT);
 
 }
 
@@ -159,6 +162,7 @@ void preparoEaquecimento (){
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
     LCD.print("Cuscuz pronto!   ");
+    tocarBuzzer();
     preparando = false;
     return;
   }
@@ -187,6 +191,7 @@ void modoManual (){
      LCD.clear ();
      LCD.setCursor (0, 0);
      LCD.print ("Cuzcuz pronto"); 
+     tocarBuzzer();
      preparo = false;
      return;
   }
@@ -219,4 +224,13 @@ void modoManual (){
 
 
 
+}
+
+void tocarBuzzer() {
+  for (int i = 0; i < 5; i++) {  // Toca 5 vezes
+    digitalWrite(buzzer, HIGH);
+    delay(500);
+    digitalWrite(buzzer, LOW);
+    delay(500);
+  }
 }
