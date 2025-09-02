@@ -1,15 +1,26 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#include <RTClib.h>
+
+RTC_DS3231 rtc;
 
 LiquidCrystal_I2C LCD (0x27, 16, 2);
 
+DateTime agora;
+
+//declaração de variaveis
 const int up = 4;
 const int down = 5;
 const int selecionar = 15;
 const int temp = 34;
 const int ebulidor = 19;
 const int prep = 23;
+const int buzzer = 12;
+
+// variaveis para defifinir a hora e min que começara o prepraro
+const int hr = 0;
+const int minuto = 3;
 
 int valorup = 0;
 int valordown = 0;
@@ -19,29 +30,46 @@ int menu = 0;
 int ultimoMenu = 0;
 int leiturapot = 0;
 int meuTempo = 1;
-int buzzer = 12;
+
+
+
 
 float tensao = 0;
 float temperatura = 0;
 
 unsigned long inicioPreparo = 0;
 unsigned long tempoAtual = meuTempo * 60UL * 1000UL;
-bool preparando = false;
-bool preparo = false;
+bool preparoAuto = false;
+bool preparoManual = false;
+bool preparoAgendado = false;
 
-void preparoEaquecimento ();
+void modoAutomatico ();
 void modoManual ();
+void modoAgendado ();
 void tocarBuzzer ();
 
 
 
 void setup() {
+  
   Wire.begin(21, 22); 
   LCD.init();
   LCD.setBacklight(HIGH);
   LCD.clear();
   LCD.setCursor(0,0);
   LCD.print("Cuscuszeira");
+
+  if (!rtc.begin()){
+    LCD.setCursor (0,0);
+    LCD.print ("ausencia do RTC");
+  }
+
+   if (rtc.lostPower()){
+    LCD.clear();
+    LCD.print ("ajustando, Data e hora ");
+
+   rtc.adjust(DateTime(__DATE__, __TIME__));
+  }
 
   pinMode(up, INPUT);  
   pinMode(down, INPUT);
@@ -54,6 +82,8 @@ void setup() {
 }
 
 void loop() {
+
+  agora = rtc.now();
 
   valorup = digitalRead (up);
   valordown = digitalRead (down);
@@ -116,7 +146,7 @@ void loop() {
        LCD.setCursor (0, 0);
        LCD.print ("modo automatico ");
        
-       preparando = true;
+       preparoAuto = true;
        inicioPreparo = millis();
        
        break;
@@ -126,12 +156,14 @@ void loop() {
       LCD.print("modo manual:  "); 
 
       inicioPreparo = millis();
-      preparo = true;
+      preparoManual = true;
       break;
 
       case 3:
        LCD.setCursor (0, 0);
        LCD.print("modo agendado: ");
+
+       preparoAgendado = true;
        break;
 
       default:
@@ -142,18 +174,22 @@ void loop() {
     delay (1000);
   }
 
-  if (preparando == true){
-    preparoEaquecimento();
+  if (preparoAuto == true){
+    modoAutomatico();
   }
 
-  if (preparo == true ){
+  if (preparoManual == true ){
     modoManual();
+  }
+
+  if (preparoAgendado == true){
+    modoAgendado();
   }
 
 } 
 
 
-void preparoEaquecimento (){
+void modoAutomatico (){
   unsigned long agora = millis();
 
   // Termina após 15 minutos
@@ -163,7 +199,7 @@ void preparoEaquecimento (){
     LCD.setCursor(0,0);
     LCD.print("Cuscuz pronto!   ");
     tocarBuzzer();
-    preparando = false;
+    preparoAuto = false;
     return;
   }
 
@@ -185,16 +221,27 @@ void modoManual (){
   unsigned long agora = millis();
   unsigned long tempoAtual = meuTempo * 60UL * 1000UL; 
 
-  if (agora - inicioPreparo >= tempoAtual && preparo == true){
+  if (valorup == HIGH){
+    meuTempo ++;
+  }
+
+  if (valordown == HIGH){
+    meuTempo --;
+  }
+
+
+
+  if (agora - inicioPreparo >= tempoAtual && preparoManual == true){
      digitalWrite (ebulidor, LOW);
      digitalWrite (prep, LOW);
      LCD.clear ();
      LCD.setCursor (0, 0);
      LCD.print ("Cuzcuz pronto"); 
      tocarBuzzer();
-     preparo = false;
+     preparoManual = false;
      return;
   }
+  
 
   // Pré-aquecimento e preparo
   if (temperatura < 30) {
@@ -209,13 +256,7 @@ void modoManual (){
     LCD.print("Preparando...     ");
   } 
 
-  if (valorup == HIGH){
-    meuTempo ++;
-  }
-
-  if (valordown == HIGH){
-    meuTempo --;
-  }
+  
 
   LCD.setCursor (0, 1);
   LCD.print ("tempo: ");
@@ -224,6 +265,21 @@ void modoManual (){
 
 
 
+}
+
+void modoAgendado (){
+  if (agora.minute () <= minuto && preparoAgendado == true ){
+    inicioPreparo = millis ();
+    preparoAgendado = false;
+    preparoAuto = true;
+  
+  }
+
+  if (preparoAuto == true){
+    modoAutomatico;
+  }
+
+  
 }
 
 void tocarBuzzer() {
