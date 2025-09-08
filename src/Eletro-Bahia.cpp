@@ -12,11 +12,11 @@ DateTime agora;
 //declaração de variaveis
 const int up = 4;
 const int down = 5;
-const int selecionar = 15;
+const int selecionar = 18;
 const int temp = 34;
-const int ebulidor = 19;
-const int prep = 23;
-const int buzzer = 12;
+const int ebulidor = 12;
+const int prep = 32;
+const int buzzer = 23;
 
 // variaveis para defifinir a hora e min que começara o prepraro
 const int hr = 0;
@@ -51,6 +51,8 @@ void tocarBuzzer ();
 
 
 void setup() {
+
+  Serial.begin(115200);
   
   Wire.begin(21, 22); 
   LCD.init();
@@ -84,6 +86,8 @@ void setup() {
 void loop() {
 
   agora = rtc.now();
+
+  
 
   valorup = digitalRead (up);
   valordown = digitalRead (down);
@@ -268,7 +272,7 @@ void modoManual (){
 }
 
 void modoAgendado (){
-  if (agora.minute () <= minuto && preparoAgendado == true ){
+  if (agora.minute () == minuto && preparoAgendado == true ){
     inicioPreparo = millis ();
     preparoAgendado = false;
     preparoAuto = true;
@@ -276,7 +280,7 @@ void modoAgendado (){
   }
 
   if (preparoAuto == true){
-    modoAutomatico;
+    modoAutomatico();
   }
 
   
