@@ -19,8 +19,11 @@ const int prep = 32;
 const int buzzer = 23;
 
 // variaveis para defifinir a hora e min que começara o prepraro
-const int hr = 0;
-const int minuto = 3;
+ int horaEscolhida = 0;
+ int minutoEscolhido = 0;
+
+ int horaRTC = 0;
+ int minutoRTC = 0;
 
 int valorup = 0;
 int valordown = 0;
@@ -30,6 +33,7 @@ int menu = 0;
 int ultimoMenu = 0;
 int leiturapot = 0;
 int meuTempo = 1;
+int etapa = 0;
 
 
 
@@ -51,8 +55,6 @@ void tocarBuzzer ();
 
 
 void setup() {
-
-  Serial.begin(115200);
   
   Wire.begin(21, 22); 
   LCD.init();
@@ -67,11 +69,80 @@ void setup() {
   }
 
    if (rtc.lostPower()){
-    LCD.clear();
-    LCD.print ("ajustando, Data e hora ");
 
-   rtc.adjust(DateTime(__DATE__, __TIME__));
+    valorup = digitalRead(up);
+    valordown = digitalRead(down);
+    valorselecionar = digitalRead(selecionar);
+
+
+    LCD.clear();
+    LCD.print ("Hr: ");
+    LCD.setCursor (5, 0);
+    LCD.print (horaRTC);
+    LCD.print (" : ");
+    LCD.print(minutoRTC);
+
+    while (etapa == 2){
+    
+
+  if (etapa == 0){
+    if (valorup == HIGH){
+     
+      horaRTC ++;
+
+      if (horaRTC > 23){
+        horaRTC = 0;
+      }
+    
+  
+    if (valordown == HIGH){
+      horaRTC --;
+
+      if (horaRTC <0){
+        horaRTC = 23;
+      }
+    }
+  }else if (etapa == 1){
+
+    if (valorup == HIGH){
+      minutoRTC ++;
+
+      if (horaRTC > 59){
+        minutoRTC = 0;
+      }
+    
+  
+    if (valordown == HIGH){
+      minutoRTC --;
+
+       if (horaRTC <0){
+        minutoRTC = 59;
+       }
+      }
+
+    }
   }
+}
+}
+
+if (valorselecionar == HIGH){
+  etapa ++;
+  if (etapa >3){
+    etapa = 0;
+    if (etapa < 0){
+      etapa = 2;
+    }
+  }
+ }
+
+if (etapa == 3){
+
+ rtc.adjust(DateTime(2025, 9, 9, horaRTC, minutoRTC, 0));
+ LCD.clear();
+ LCD.print("Hora gravada!");
+ delay(1000);
+}
+}
 
   pinMode(up, INPUT);  
   pinMode(down, INPUT);
@@ -126,7 +197,7 @@ void loop() {
      }
   }
 
-  //mostra no seria os modos
+  //mostra os modos
   if (menu != ultimoMenu) {
 
     LCD.clear();
@@ -166,6 +237,8 @@ void loop() {
       case 3:
        LCD.setCursor (0, 0);
        LCD.print("modo agendado: ");
+
+
 
        preparoAgendado = true;
        break;
@@ -272,7 +345,7 @@ void modoManual (){
 }
 
 void modoAgendado (){
-  if (agora.minute () == minuto && preparoAgendado == true ){
+  if ( agora.hour() == horaEscolhida && agora.minute () == minutoEscolhido && preparoAgendado == true ){
     inicioPreparo = millis ();
     preparoAgendado = false;
     preparoAuto = true;
