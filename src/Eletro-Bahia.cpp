@@ -34,6 +34,7 @@ int ultimoMenu = 0;
 int leiturapot = 0;
 int meuTempo = 1;
 int etapa = 0;
+int ultimaetapa = 0;
 
 
 
@@ -82,8 +83,22 @@ void setup() {
     LCD.print (" : ");
     LCD.print(minutoRTC);
 
-    while (etapa == 2){
-    
+     if (valorselecionar == HIGH){
+     etapa ++;
+     if (etapa >3){
+       etapa = 0;
+        if (etapa < 0){
+         etapa = 3;
+       }
+     }
+ }
+
+
+   while (etapa < 2){
+
+    if (etapa!= ultimaetapa) {
+    ultimaetapa = etapa;
+  }
 
   if (etapa == 0){
     if (valorup == HIGH){
@@ -124,16 +139,6 @@ void setup() {
   }
 }
 }
-
-if (valorselecionar == HIGH){
-  etapa ++;
-  if (etapa >3){
-    etapa = 0;
-    if (etapa < 0){
-      etapa = 2;
-    }
-  }
- }
 
 if (etapa == 3){
 
