@@ -7,8 +7,6 @@ RTC_DS3231 rtc;
 
 LiquidCrystal_I2C LCD (0x27, 16, 2);
 
-DateTime agora;
-
 //declaração de variaveis
 const int up = 4;
 const int down = 5;
@@ -17,13 +15,6 @@ const int temp = 34;
 const int ebulidor = 12;
 const int prep = 32;
 const int buzzer = 23;
-
-// variaveis para defifinir a hora e min que começara o prepraro
- int horaEscolhida = 0;
- int minutoEscolhido = 0;
-
- int horaRTC = 0;
- int minutoRTC = 0;
 
 int valorup = 0;
 int valordown = 0;
@@ -34,10 +25,6 @@ int ultimoMenu = 0;
 int leiturapot = 0;
 int meuTempo = 1;
 int etapa = 0;
-int ultimaetapa = 0;
-
-
-
 
 float tensao = 0;
 float temperatura = 0;
@@ -46,13 +33,10 @@ unsigned long inicioPreparo = 0;
 unsigned long tempoAtual = meuTempo * 60UL * 1000UL;
 bool preparoAuto = false;
 bool preparoManual = false;
-bool preparoAgendado = false;
 
 void modoAutomatico ();
 void modoManual ();
-void modoAgendado ();
 void tocarBuzzer ();
-
 
 
 void setup() {
@@ -63,91 +47,6 @@ void setup() {
   LCD.clear();
   LCD.setCursor(0,0);
   LCD.print("Cuscuszeira");
-
-  if (!rtc.begin()){
-    LCD.setCursor (0,0);
-    LCD.print ("ausencia do RTC");
-  }
-
-   if (rtc.lostPower()){
-
-    valorup = digitalRead(up);
-    valordown = digitalRead(down);
-    valorselecionar = digitalRead(selecionar);
-
-
-    LCD.clear();
-    LCD.print ("Hr: ");
-    LCD.setCursor (5, 0);
-    LCD.print (horaRTC);
-    LCD.print (" : ");
-    LCD.print(minutoRTC);
-
-     if (valorselecionar == HIGH){
-     etapa ++;
-     if (etapa >3){
-       etapa = 0;
-        if (etapa < 0){
-         etapa = 3;
-       }
-     }
- }
-
-
-   while (etapa < 2){
-
-    if (etapa!= ultimaetapa) {
-    ultimaetapa = etapa;
-  }
-
-  if (etapa == 0){
-    if (valorup == HIGH){
-     
-      horaRTC ++;
-
-      if (horaRTC > 23){
-        horaRTC = 0;
-      }
-    
-  
-    if (valordown == HIGH){
-      horaRTC --;
-
-      if (horaRTC <0){
-        horaRTC = 23;
-      }
-    }
-  }else if (etapa == 1){
-
-    if (valorup == HIGH){
-      minutoRTC ++;
-
-      if (horaRTC > 59){
-        minutoRTC = 0;
-      }
-    
-  
-    if (valordown == HIGH){
-      minutoRTC --;
-
-       if (horaRTC <0){
-        minutoRTC = 59;
-       }
-      }
-
-    }
-  }
-}
-}
-
-if (etapa == 3){
-
- rtc.adjust(DateTime(2025, 9, 9, horaRTC, minutoRTC, 0));
- LCD.clear();
- LCD.print("Hora gravada!");
- delay(1000);
-}
-}
 
   pinMode(up, INPUT);  
   pinMode(down, INPUT);
@@ -160,10 +59,6 @@ if (etapa == 3){
 }
 
 void loop() {
-
-  agora = rtc.now();
-
-  
 
   valorup = digitalRead (up);
   valordown = digitalRead (down);
@@ -185,7 +80,7 @@ void loop() {
  if (valorup == 1){
   menu++;
 
-  if (menu >3){
+  if (menu >2){
     menu = 1;
   }
  }
@@ -198,7 +93,7 @@ void loop() {
   if (valordown == 1){
     menu --;
      if (menu < 1){
-      menu = 3;
+      menu = 2;
      }
   }
 
@@ -239,15 +134,6 @@ void loop() {
       preparoManual = true;
       break;
 
-      case 3:
-       LCD.setCursor (0, 0);
-       LCD.print("modo agendado: ");
-
-
-
-       preparoAgendado = true;
-       break;
-
       default:
       LCD.setCursor(0, 0);
        LCD.print("modo inexistente");
@@ -263,12 +149,8 @@ void loop() {
   if (preparoManual == true ){
     modoManual();
   }
-
-  if (preparoAgendado == true){
-    modoAgendado();
-  }
-
 } 
+
 
 
 void modoAutomatico (){
@@ -347,21 +229,6 @@ void modoManual (){
 
 
 
-}
-
-void modoAgendado (){
-  if ( agora.hour() == horaEscolhida && agora.minute () == minutoEscolhido && preparoAgendado == true ){
-    inicioPreparo = millis ();
-    preparoAgendado = false;
-    preparoAuto = true;
-  
-  }
-
-  if (preparoAuto == true){
-    modoAutomatico();
-  }
-
-  
 }
 
 void tocarBuzzer() {
