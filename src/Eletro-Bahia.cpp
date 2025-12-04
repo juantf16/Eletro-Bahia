@@ -1,17 +1,21 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
-#include <RTClib.h>
+#include <DallasTemperature.h>
+#include <OneWire.h>
 
-RTC_DS3231 rtc;
 
 LiquidCrystal_I2C LCD (0x27, 16, 2);
 
+const int PINO_ONEWIRE = 4;
+OneWire oneWire(PINO_ONEWIRE);
+DallasTemperature sensor(&oneWire); 
+DeviceAddress endereco_temp;
+
 //declaração de variaveis
-const int up = 4;
+const int up = 14; // evitar conflito com OneWire (GPIO4). Ajuste conforme seu circuito
 const int down = 5;
 const int selecionar = 18;
-const int temp = 34;
 const int ebulidor = 12;
 const int prep = 32;
 const int buzzer = 23;
@@ -42,16 +46,16 @@ void tocarBuzzer ();
 void setup() {
   
   Wire.begin(21, 22); 
+  sensor.begin();
   LCD.init();
   LCD.setBacklight(HIGH);
   LCD.clear();
-  LCD.setCursor(0,0);
+  LCD.setCursor(0,0); 
   LCD.print("Cuscuszeira");
 
   pinMode(up, INPUT);  
   pinMode(down, INPUT);
   pinMode (selecionar, INPUT);
-  pinMode (temp, INPUT);
   pinMode (ebulidor, OUTPUT);
   pinMode (prep, OUTPUT);
   pinMode (buzzer, OUTPUT);
@@ -60,21 +64,23 @@ void setup() {
 
 void loop() {
 
-  valorup = digitalRead (up);
-  valordown = digitalRead (down);
-  valorselecionar = digitalRead (selecionar);
-  leiturapot = analogRead (temp);
+  // ler botões (INPUT_PULLUP: LOW = pressionado)
+  valorup = digitalRead(up);
+  valordown = digitalRead(down);
+  valorselecionar = digitalRead(selecionar);
 
+  // leitura do sensor: solicitar temperatura e em seguida obter o valor
+  if (sensor.getAddress(endereco_temp, 0)) {
+    sensor.requestTemperatures();
+    temperatura = sensor.getTempC(endereco_temp);
+  } else {
+    temperatura = NAN; // sensor não disponível
+  }
 
-   // convertendo analog => para volts
-  tensao = (leiturapot / 4095.0) * 3.3;
-
-  // simulando: 0V => 0°C e 3.3V => 100°c
-  temperatura = (tensao / 3.3) *100.0;
 
   // mepeando bot up
   if (valorup == 1){
-      delay(500);
+      delay(200);
  }
 
  if (valorup == 1){
@@ -87,7 +93,7 @@ void loop() {
 
  // mapeando bot down
   if (valordown == 1){
-    delay (500);
+    delay (200);
   }
 
   if (valordown == 1){
@@ -110,7 +116,7 @@ void loop() {
 
   //mapeando bot selecionar 
   if (valorselecionar == 1){
-    delay (500);
+    delay (200);
   }
 
   //config dos modos da cuscuszeira
