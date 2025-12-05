@@ -34,14 +34,13 @@ float tensao = 0;
 float temperatura = 0;
 
 unsigned long inicioPreparo = 0;
-unsigned long tempoAtual = meuTempo * 60UL * 1000UL;
-bool preparoAuto = false;
-bool preparoManual = false;
+//unsigned long tempoAtual = 10 * 60UL * 1000UL;
+bool preparo1 = false;
+bool preparo2 = false;
 
-void modoAutomatico ();
-void modoManual ();
+void modo1 ();
+void modo2 ();
 void tocarBuzzer ();
-
 
 void setup() {
   
@@ -125,51 +124,51 @@ void loop() {
     switch (menu){
       case 1:
        LCD.setCursor (0, 0);
-       LCD.print ("modo automatico ");
+       LCD.print ("modo 1 ");
        
-       preparoAuto = true;
+       preparo1 = true;
        inicioPreparo = millis();
        
        break;
 
       case 2:
       LCD.setCursor (0, 0);
-      LCD.print("modo manual:  "); 
+      LCD.print("modo 2:  "); 
 
+      preparo2 = true;
       inicioPreparo = millis();
-      preparoManual = true;
       break;
 
       default:
-      LCD.setCursor(0, 0);
+       LCD.setCursor(0, 0);
        LCD.print("modo inexistente");
        break;
     }
     delay (1000);
   }
 
-  if (preparoAuto == true){
-    modoAutomatico();
+  if (preparo1 == true){
+    modo1();
   }
 
-  if (preparoManual == true ){
-    modoManual();
+  if (preparo2 == true ){
+    modo2();
   }
 } 
 
 
 
-void modoAutomatico (){
+void modo1 (){
   unsigned long agora = millis();
 
-  // Termina após 15 minutos
-  if (agora - inicioPreparo >= 15UL * 60UL * 1000UL) {
+  // Termina após 5 minutos
+  if (agora - inicioPreparo >= 5UL * 60UL * 1000UL) {
     digitalWrite(ebulidor, LOW);
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
     LCD.print("Cuscuz pronto!   ");
     tocarBuzzer();
-    preparoAuto = false;
+    preparo1 = false;
     return;
   }
 
@@ -187,31 +186,29 @@ void modoAutomatico (){
   }
 }
 
-void modoManual (){
+void modo2(){
   unsigned long agora = millis();
-  unsigned long tempoAtual = meuTempo * 60UL * 1000UL; 
+  //unsigned long tempoAtual = 10UL* 60UL * 1000UL; 
 
-  if (valorup == HIGH){
+  /*if (valorup == HIGH){
     meuTempo ++;
   }
 
   if (valordown == HIGH){
     meuTempo --;
+  }*/
+
+
+
+  if (agora - inicioPreparo >= 10UL * 60UL * 1000UL) {
+    digitalWrite(ebulidor, LOW);
+    digitalWrite(prep, LOW);
+    LCD.setCursor(0,0);
+    LCD.print("Cuscuz pronto!   ");
+    tocarBuzzer();
+    preparo2 = false;
+    return;
   }
-
-
-
-  if (agora - inicioPreparo >= tempoAtual && preparoManual == true){
-     digitalWrite (ebulidor, LOW);
-     digitalWrite (prep, LOW);
-     LCD.clear ();
-     LCD.setCursor (0, 0);
-     LCD.print ("Cuzcuz pronto"); 
-     tocarBuzzer();
-     preparoManual = false;
-     return;
-  }
-  
 
   // Pré-aquecimento e preparo
   if (temperatura < 30) {
@@ -224,15 +221,15 @@ void modoManual (){
     digitalWrite(prep, LOW);
     LCD.setCursor(0,0);
     LCD.print("Preparando...     ");
-  } 
+  }
 
   
 
-  LCD.setCursor (0, 1);
+  /*LCD.setCursor (0, 1);
   LCD.print ("tempo: ");
   LCD.print(meuTempo);
   LCD.print (" min  ");
-
+*/
 
 
 }
