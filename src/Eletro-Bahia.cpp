@@ -13,12 +13,12 @@ DallasTemperature sensor(&oneWire);
 DeviceAddress endereco_temp;
 
 //declaração de variaveis
-const int up = 14; // evitar conflito com OneWire (GPIO4). Ajuste conforme seu circuito
-const int down = 5;
-const int selecionar = 18;
-const int ebulidor = 12;
-const int prep = 32;
-const int buzzer = 23;
+const int up = A0;         
+const int down = 5;        
+const int selecionar = A1; 
+const int ebulidor = 10;
+const int prep = 7;
+const int buzzer = 6;
 
 int valorup = 0;
 int valordown = 0;
@@ -45,7 +45,8 @@ void tocarBuzzer ();
 
 void setup() {
   
-  Wire.begin(21, 22); 
+  // Arduino Mega: SDA = A4, SCL = A5 (I2C padrão)
+  Wire.begin(); // ou Wire.begin(20, 21) se necessário customizar
   sensor.begin();
   LCD.init();
   LCD.setBacklight(HIGH);
@@ -198,8 +199,7 @@ void modoManual (){
   if (valordown == HIGH){
     meuTempo --;
   }
-
-
+  
 
   if (agora - inicioPreparo >= tempoAtual && preparoManual == true){
      digitalWrite (ebulidor, LOW);
